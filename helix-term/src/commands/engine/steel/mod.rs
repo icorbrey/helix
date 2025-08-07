@@ -23,7 +23,7 @@ use helix_view::{
     annotations::diagnostics::DiagnosticFilter,
     document::{DocumentInlayHints, DocumentInlayHintsId, Mode},
     editor::{
-        Action, AutoSave, BufferLine, ConfigEvent, CursorShapeConfig, FilePickerConfig,
+        Action, AutoSave, BufferLineRenderMode, ConfigEvent, CursorShapeConfig, FilePickerConfig,
         GutterConfig, IndentGuidesConfig, LineEndingConfig, LineNumber, LspConfig, SearchConfig,
         SmartTabConfig, StatusLineConfig, TerminalConfig, WhitespaceConfig,
     },
@@ -3177,16 +3177,16 @@ impl HelixConfiguration {
     fn bufferline(&self, buffer_config: SteelVal) -> anyhow::Result<()> {
         let config = match buffer_config {
             SteelVal::StringV(s) | SteelVal::SymbolV(s) => match s.as_str() {
-                "never" => BufferLine::Never,
-                "always" => BufferLine::Always,
-                "multiple" => BufferLine::Multiple,
+                "never" => BufferLineRenderMode::Never,
+                "always" => BufferLineRenderMode::Always,
+                "multiple" => BufferLineRenderMode::Multiple,
                 other => anyhow::bail!("Unrecognized bufferline option: {}", other),
             },
             other => anyhow::bail!("Unrecognized bufferline option: {}", other),
         };
 
         let mut app_config = self.load_config();
-        app_config.editor.bufferline = config;
+        app_config.editor.bufferline = config.into();
         self.store_config(app_config);
 
         Ok(())
