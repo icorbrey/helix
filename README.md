@@ -1,3 +1,33 @@
+This is my personal fork of Helix that includes a variety of experimental
+features from the community, including (in no particular order):
+
+- [Extended comment tokens for C#](https://github.com/helix-editor/helix/pull/14164)
+- [Fixed key handling in completions](https://github.com/helix-editor/helix/pull/13054)
+- [Jujutsu support](https://github.com/helix-editor/helix/pull/12022)
+- [Steel plugin system](https://github.com/helix-editor/helix/pull/8675)
+- [Unique bufferline titles](https://github.com/helix-editor/helix/pull/13565)
+
+When adding or removing experiments, use `jj remerge` to sync `custom` up. See
+the repo config below:
+
+```toml
+[revset-aliases]
+"trunk()" = "master@origin"
+"latest_merge(x)" = "latest(::x & merges())"
+"experiments()" = "tracked_remote_bookmarks() ~ (custom@origin | master)"
+
+[git]
+fetch = "glob:*"
+
+[aliases]
+"remerge" = ["jj", "rebase", "-r", "latest_merge(custom)", "-A", "experiments()"]
+```
+
+If you're looking for my contribution fork, you can find it at
+https://github.com/icorbrey-contrib/helix.
+
+---
+
 <div align="center">
 
 <h1>
