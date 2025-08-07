@@ -31,7 +31,7 @@ assets = [
 ]
 
 [features]
-default = ["git", "jj"]
+default = ["git", "jj", "steel"]
 unicode-lines = ["helix-core/unicode-lines", "helix-view/unicode-lines"]
 integration = ["helix-event/integration_test"]
 # VCS features
