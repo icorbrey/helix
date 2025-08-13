@@ -1404,7 +1404,7 @@ fn reload(cx: &mut compositor::Context, _args: Args, event: PromptEvent) -> anyh
 
     let scrolloff = cx.editor.config().scrolloff;
     let (view, doc) = current!(cx.editor);
-    doc.reload(view, &cx.editor.diff_providers).map(|_| {
+    doc.reload(view, &mut cx.editor.diff_providers).map(|_| {
         view.ensure_cursor_in_view(doc, scrolloff);
     })?;
     if let Some(path) = doc.path() {
@@ -1439,6 +1439,8 @@ fn reload_all(cx: &mut compositor::Context, _args: Args, event: PromptEvent) -> 
         })
         .collect();
 
+    cx.editor.diff_providers.reset();
+
     for (doc_id, view_ids) in docs_view_ids {
         let doc = doc_mut!(cx.editor, &doc_id);
 
@@ -1448,7 +1450,7 @@ fn reload_all(cx: &mut compositor::Context, _args: Args, event: PromptEvent) -> 
         // Ensure that the view is synced with the document's history.
         view.sync_changes(doc);
 
-        if let Err(error) = doc.reload(view, &cx.editor.diff_providers) {
+        if let Err(error) = doc.reload(view, &mut cx.editor.diff_providers) {
             cx.editor.set_error(format!("{}", error));
             continue;
         }
@@ -1479,7 +1481,14 @@ fn update(cx: &mut compositor::Context, args: Args, event: PromptEvent) -> anyho
 
     let (_view, doc) = current!(cx.editor);
     if doc.is_modified() {
-        write(cx, args, event)
+        write_impl(
+            cx,
+            None,
+            WriteOptions {
+                force: false,
+                auto_format: !args.has_flag(WRITE_NO_FORMAT_FLAG.name),
+            },
+        )
     } else {
         Ok(())
     }
@@ -3247,6 +3256,7 @@ pub const TYPABLE_COMMAND_LIST: &[TypableCommand] = &[
         completer: CommandCompleter::none(),
         signature: Signature {
             positionals: (0, Some(0)),
+            flags: &[WRITE_NO_FORMAT_FLAG],
             ..Signature::DEFAULT
         },
     },
